@@ -49,7 +49,11 @@ public class UserService {
         log.info("Registering user with email: {}", registerUserDto.getEmail());
 
         if (userRepository.existsByEmail(registerUserDto.getEmail())) {
-            throw new UserAlreadyExistsException(registerUserDto.getEmail());
+            throw new UserAlreadyExistsException("email", registerUserDto.getEmail());
+        }
+
+        if (userRepository.existsByUsername(registerUserDto.getUsername())) {
+            throw new UserAlreadyExistsException("username", registerUserDto.getUsername());
         }
 
         String hashedPassword = passwordEncoder.encode(registerUserDto.getPassword());
