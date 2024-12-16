@@ -1,8 +1,6 @@
 package com.example.conduit_springboot_vaadin.controller;
 
-import com.example.conduit_springboot_vaadin.dto.RegisterUserDto;
-import com.example.conduit_springboot_vaadin.dto.ResponseDto;
-import com.example.conduit_springboot_vaadin.dto.UserDto;
+import com.example.conduit_springboot_vaadin.dto.*;
 import com.example.conduit_springboot_vaadin.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.ErrorResponse;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-@RequestMapping("api/user")
+@RequestMapping("api/users")
 public class UserController {
 
     private final UserService userService;
@@ -50,9 +49,11 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "Invalid input data",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "409", description = "User already exists",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "422", description = "Validation failed due to invalid input parameters",
+                    content = @Content(schema = @Schema(implementation = MethodArgumentNotValidException.class)))
     })
-    @PostMapping("/register")
+    @PostMapping
     public ResponseEntity<ResponseDto<UserDto>> register(@Valid @RequestBody RegisterUserDto registerUserDto) {
 
         log.info("Registering a new user with email: {}", registerUserDto.getEmail());
@@ -63,6 +64,32 @@ public class UserController {
         log.info("User registered successfully: {}", userDto.getEmail());
 
         ResponseDto<UserDto> response = new ResponseDto<>(userDto, "User registered successfully.");
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(
+            summary = "Authenticate user and return tokens",
+            description = "Logs in the user and returns access and refresh tokens along with user ID."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Login successful",
+                    content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "401", description = "Invalid login data",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "422", description = "Validation failed due to invalid input parameters",
+                    content = @Content(schema = @Schema(implementation = MethodArgumentNotValidException.class)))
+    })
+    @PostMapping("/login")
+    public ResponseEntity<ResponseDto<AuthResponseDto>> login(@Valid @RequestBody LoginDto loginDto) {
+
+        log.info("User login attempt with email: {}", loginDto.getEmail());
+        log.debug("Login request data: {}", loginDto);
+
+        AuthResponseDto authResponseDto = userService.loginUser(loginDto);
+
+        log.info("Login successful for user: {}", loginDto.getEmail());
+
+        ResponseDto<AuthResponseDto> response = new ResponseDto<>(authResponseDto, "Login successful");
         return ResponseEntity.ok(response);
     }
 

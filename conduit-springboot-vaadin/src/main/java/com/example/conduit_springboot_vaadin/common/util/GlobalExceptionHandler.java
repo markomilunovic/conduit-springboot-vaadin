@@ -1,6 +1,7 @@
 package com.example.conduit_springboot_vaadin.common.util;
 
 
+import com.example.conduit_springboot_vaadin.exception.InvalidCredentialsException;
 import com.example.conduit_springboot_vaadin.exception.UserAlreadyExistsException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -89,6 +90,30 @@ public class GlobalExceptionHandler {
         );
 
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+    }
+
+    /**
+     * Handles exceptions for invalid login credentials.
+     * <p>
+     * This method captures {@link InvalidCredentialsException} instances, which are
+     * thrown when a user provides incorrect email or password during login. It returns
+     * an error response with a specific message and an HTTP 401 Unauthorized status.
+     * </p>
+     *
+     * @param ex      The {@link InvalidCredentialsException} indicating invalid login credentials.
+     * @param request The current web request during which the exception occurred.
+     * @return A {@link ResponseEntity} containing an {@link ErrorResponse} with a
+     *         specific error message and a status of {@link HttpStatus#UNAUTHORIZED}.
+     */
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handeInvalidCredentialsException(InvalidCredentialsException ex, WebRequest request) {
+        log.warn("InvalidCredentialsException: {}", ex.getReason());
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                ex.getReason(),
+                request.getDescription(false)
+        );
+        return new ResponseEntity<>(errorResponse, ex.getStatusCode());
     }
 
 }
