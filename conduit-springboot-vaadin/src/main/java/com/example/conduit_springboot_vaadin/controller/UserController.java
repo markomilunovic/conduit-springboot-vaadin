@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
-@RequestMapping("api/users")
+@RequestMapping("api")
 public class UserController {
 
     private final UserService userService;
@@ -79,7 +79,7 @@ public class UserController {
             @ApiResponse(responseCode = "422", description = "Validation failed due to invalid input parameters",
                     content = @Content(schema = @Schema(implementation = MethodArgumentNotValidException.class)))
     })
-    @PostMapping("/login")
+    @PostMapping("/users/login")
     public ResponseEntity<ResponseDto<AuthResponseDto>> login(@Valid @RequestBody LoginDto loginDto) {
 
         log.info("User login attempt with email: {}", loginDto.getEmail());
