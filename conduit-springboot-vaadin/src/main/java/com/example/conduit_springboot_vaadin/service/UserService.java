@@ -13,6 +13,8 @@ import com.example.conduit_springboot_vaadin.model.RefreshToken;
 import com.example.conduit_springboot_vaadin.model.User;
 import com.example.conduit_springboot_vaadin.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +30,7 @@ public class UserService {
     private final JwtUtil jwtUtil;
     private final TokenService tokenService;
 
+    @Autowired
     public UserService(
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
@@ -135,6 +138,20 @@ public class UserService {
                 .bio(user.getBio())
                 .image(user.getImage())
                 .build();
+    }
+
+    /**
+     * Retrieves the current user by their ID.
+     *
+     * @param userId The ID of the user.
+     * @return The {@link UserDto} representing the user.
+     * @throws UsernameNotFoundException if the user is not found.
+     */
+    public UserDto getCurrentUser(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + userId));
+
+        return userMapper.userToUserDto(user);
     }
 
 }

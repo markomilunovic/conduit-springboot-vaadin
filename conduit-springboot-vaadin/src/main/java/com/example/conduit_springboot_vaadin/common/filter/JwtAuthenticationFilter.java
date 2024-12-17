@@ -2,7 +2,7 @@ package com.example.conduit_springboot_vaadin.common.filter;
 
 
 import com.example.conduit_springboot_vaadin.common.util.JwtUtil;
-import com.example.conduit_springboot_vaadin.service.CustomUserDetailsService;
+import com.example.conduit_springboot_vaadin.security.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

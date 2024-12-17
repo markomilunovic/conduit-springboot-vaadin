@@ -1,12 +1,14 @@
-package com.example.conduit_springboot_vaadin.service;
+package com.example.conduit_springboot_vaadin.security;
 
 
+import com.example.conduit_springboot_vaadin.model.User;
 import com.example.conduit_springboot_vaadin.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
 
 /**
  * Service for loading user-specific data for authentication and authorization purposes.
@@ -28,35 +30,31 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     /**
      * Loads a user by username for authentication.
-     * <p>
-     * This method retrieves user details based on the username provided. It is used by Spring Security
-     * during the authentication process to validate user credentials.
-     * </p>
      *
      * @param username The username of the user.
-     * @return A {@link UserDetails} object containing user information.
+     * @return A {@link CustomUserDetails} object containing user information.
      * @throws UsernameNotFoundException if a user with the specified username does not exist.
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsername(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+
+        return new CustomUserDetails(user);
     }
 
     /**
-     * Loads a user by user ID.
-     * <p>
-     * This method retrieves user details based on the user ID provided. It is used for authorization purposes
-     * in cases where user details are required for security context setup.
-     * </p>
+     * Loads a user by user ID for authorization purposes.
      *
      * @param id The ID of the user.
-     * @return A {@link UserDetails} object containing user information.
+     * @return A {@link CustomUserDetails} object containing user information.
      * @throws UsernameNotFoundException if a user with the specified ID does not exist.
      */
     public UserDetails loadUserById(String id) {
-        return userRepository.findById(id)
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
+
+        return new CustomUserDetails(user);
     }
 
 }

@@ -1,6 +1,8 @@
 package com.example.conduit_springboot_vaadin.controller;
 
 import com.example.conduit_springboot_vaadin.dto.*;
+import com.example.conduit_springboot_vaadin.security.CustomUserDetails;
+import com.example.conduit_springboot_vaadin.security.CustomUserDetailsService;
 import com.example.conduit_springboot_vaadin.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -11,12 +13,10 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -90,6 +90,29 @@ public class UserController {
         log.info("Login successful for user: {}", loginDto.getEmail());
 
         ResponseDto<AuthResponseDto> response = new ResponseDto<>(authResponseDto, "Login successful");
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Retrieves the current authenticated user's information.
+     *
+     * @param userDetails The {@link CustomUserDetails} of the authenticated user.
+     * @return A {@link ResponseEntity} containing the {@link UserDto} of the current user.
+     */
+    @Operation(
+            summary = "Get Current User",
+            description = "Retrieves the current authenticated user's information."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "User retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    @GetMapping("/user")
+    public ResponseEntity<ResponseDto<UserDto>> getCurrentUser(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        UserDto userDto = userService.getCurrentUser(userDetails.getId());
+        ResponseDto<UserDto> response = new ResponseDto<>(userDto, "User retrieved successfully.");
         return ResponseEntity.ok(response);
     }
 
