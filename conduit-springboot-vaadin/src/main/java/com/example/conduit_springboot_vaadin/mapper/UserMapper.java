@@ -30,14 +30,4 @@ public class UserMapper {
                 .build();
     }
 
-    public User updateUserDtoToUser(UpdateUserDto updateUserDto) {
-        return User.builder()
-                .username(updateUserDto.getUsername())
-                .email(updateUserDto.getEmail())
-                .password(updateUserDto.getPassword())
-                .bio(updateUserDto.getBio())
-                .image(updateUserDto.getImage())
-                .build();
-    }
-
 }
