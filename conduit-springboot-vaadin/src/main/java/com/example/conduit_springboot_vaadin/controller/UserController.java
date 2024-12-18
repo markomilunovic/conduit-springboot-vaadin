@@ -13,7 +13,9 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -114,6 +116,35 @@ public class UserController {
         UserDto userDto = userService.getCurrentUser(userDetails.getId());
         ResponseDto<UserDto> response = new ResponseDto<>(userDto, "User retrieved successfully.");
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(
+            summary = "Update user by email",
+            description = "Updates the user by its email."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "User updated successfully",
+                    content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "404", description = "User not found",
+                    content = @Content(schema = @Schema(implementation = UsernameNotFoundException.class))),
+            @ApiResponse(responseCode = "422", description = "Validation failed due to invalid input parameters",
+                    content = @Content(schema = @Schema(implementation = MethodArgumentNotValidException.class)))
+    })
+    @PutMapping("/user")
+    public ResponseEntity<ResponseDto<UserDto>> updateUser(
+            @Valid @RequestBody UpdateUserDto userDto,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        log.info("Request received to update user with ID: {}", userDetails.getId());
+        log.debug("Received request to update user with data: {}", userDto);
+
+        UserDto updatedUser = userService.updateUser(userDto, userDetails.getId());
+
+        log.info("User updated successfully: {}", updatedUser.getEmail());
+        log.debug("UserDto updated with data: {}", updatedUser);
+
+        ResponseDto<UserDto> response = new ResponseDto<>(updatedUser, "User updated successfully");
+        return ResponseEntity.ok(response);
+
     }
 
 }

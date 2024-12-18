@@ -1,10 +1,7 @@
 package com.example.conduit_springboot_vaadin.service;
 
 import com.example.conduit_springboot_vaadin.common.util.JwtUtil;
-import com.example.conduit_springboot_vaadin.dto.AuthResponseDto;
-import com.example.conduit_springboot_vaadin.dto.LoginDto;
-import com.example.conduit_springboot_vaadin.dto.RegisterUserDto;
-import com.example.conduit_springboot_vaadin.dto.UserDto;
+import com.example.conduit_springboot_vaadin.dto.*;
 import com.example.conduit_springboot_vaadin.exception.InvalidCredentialsException;
 import com.example.conduit_springboot_vaadin.exception.UserAlreadyExistsException;
 import com.example.conduit_springboot_vaadin.mapper.UserMapper;
@@ -152,6 +149,60 @@ public class UserService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + userId));
 
         return userMapper.userToUserDto(user);
+    }
+
+    /**
+     * Updates the authenticated user's information based on the provided data.
+     * <p>
+     * This method retrieves the user from the repository using their ID, updates the user's username, bio, image, and password
+     * if they are provided in {@link UpdateUserDto}, encodes the new password using {@link PasswordEncoder} before setting it,
+     * saves the updated user back to the repository, and maps the updated user entity to a {@link UserDto} for response.
+     * </p>
+     *
+     * @param updateUserDto The data transfer object containing the user's updated information.
+     *                      It may include fields such as {@code username}, {@code email}, {@code bio}, {@code image}, and {@code password}.
+     * @param userId        The ID of the user to update.
+     * @return A {@link UserDto} representing the updated user information.
+     * @throws UsernameNotFoundException if no user is found with the provided ID.
+     * @throws IllegalArgumentException  if {@link UpdateUserDto} contains invalid data.
+     */
+    public UserDto updateUser(UpdateUserDto updateUserDto, String userId) {
+        log.info("Logging user with ID: {}", userId);
+        log.debug("Logging updateUserDto data: {}", updateUserDto);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with ID: " + userId));
+
+        if (updateUserDto.getUsername() != null) {
+            user.setUsername(updateUserDto.getUsername());
+        }
+
+        if (updateUserDto.getEmail() != null) {
+            user.setEmail(updateUserDto.getEmail());
+        }
+
+        if (updateUserDto.getBio() != null) {
+            user.setBio(updateUserDto.getBio());
+        }
+
+        if (updateUserDto.getImage() != null) {
+            user.setImage(updateUserDto.getImage());
+        }
+
+        if (updateUserDto.getPassword() != null) {
+            String hashedPassword = passwordEncoder.encode(updateUserDto.getPassword());
+            user.setPassword(hashedPassword);
+            log.debug("Password encoded and set for user update");
+        }
+
+        user = userRepository.save(user);
+        log.info("User updated successfully: {}", user.getId());
+
+        UserDto updatedUserDto = userMapper.userToUserDto(user);
+        log.debug("Converted updated User to UserDto: {}", updatedUserDto);
+
+        return updatedUserDto;
+
     }
 
 }
