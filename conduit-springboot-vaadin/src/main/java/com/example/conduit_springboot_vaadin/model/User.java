@@ -11,6 +11,7 @@ import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -39,7 +40,8 @@ public class User implements UserDetails, CredentialsContainer {
     private String password;
     private String bio;
     private String image;
-    private List<String> following;
+    @Builder.Default
+    private List<String> following = new ArrayList<>();
 
     @Override
     public void eraseCredentials() {

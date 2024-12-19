@@ -1,7 +1,7 @@
 package com.example.conduit_springboot_vaadin.service;
 
 import com.example.conduit_springboot_vaadin.common.util.JwtUtil;
-import com.example.conduit_springboot_vaadin.dto.*;
+import com.example.conduit_springboot_vaadin.dto.user.*;
 import com.example.conduit_springboot_vaadin.exception.InvalidCredentialsException;
 import com.example.conduit_springboot_vaadin.exception.UserAlreadyExistsException;
 import com.example.conduit_springboot_vaadin.mapper.UserMapper;

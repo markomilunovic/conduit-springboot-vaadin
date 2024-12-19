@@ -1,4 +1,4 @@
-package com.example.conduit_springboot_vaadin.dto;
+package com.example.conduit_springboot_vaadin.dto.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
@@ -9,15 +9,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
- * Data Transfer Object for handling User update request.
- * This DTO encapsulates the necessary information required for updating a user.
+ * Data Transfer Object for handling User registration request.
+ * This DTO encapsulates the necessary information required for a user to register.
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateUserDto {
+public class RegisterUserDto {
 
     @Schema(description = "Username of the user", example = "user123")
     @NotBlank(message = "Username field must not be empty.")
@@ -38,4 +40,6 @@ public class UpdateUserDto {
     @Schema(description = "URL to the user's profile image", example = "https://example.com/profile.jpg")
     private String image;
 
+    @Schema(description = "List of user IDs that this user is following", example = "[\"userId1\", \"userId2\"]")
+    private List<String> following;
 }

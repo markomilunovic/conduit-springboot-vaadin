@@ -1,9 +1,8 @@
 package com.example.conduit_springboot_vaadin.controller;
 
-import com.example.conduit_springboot_vaadin.dto.*;
+import com.example.conduit_springboot_vaadin.dto.user.*;
 import com.example.conduit_springboot_vaadin.exception.InvalidCredentialsException;
 import com.example.conduit_springboot_vaadin.security.CustomUserDetails;
-import com.example.conduit_springboot_vaadin.security.CustomUserDetailsService;
 import com.example.conduit_springboot_vaadin.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,7 +13,6 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.ErrorResponse;
@@ -50,7 +48,7 @@ public class UserController {
             @ApiResponse(responseCode = "422", description = "Validation failed due to invalid input parameters",
                     content = @Content(schema = @Schema(implementation = MethodArgumentNotValidException.class)))
     })
-    @PostMapping
+    @PostMapping("/users")
     public ResponseEntity<ResponseDto<UserDto>> register(@Valid @RequestBody RegisterUserDto registerUserDto) {
 
         log.info("Registering a new user with email: {}", registerUserDto.getEmail());
@@ -97,8 +95,10 @@ public class UserController {
             description = "Retrieves the current authenticated user's information."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "User retrieved successfully"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized")
+            @ApiResponse(responseCode = "200", description = "User retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = InvalidCredentialsException.class)))
     })
     @GetMapping("/user")
     public ResponseEntity<ResponseDto<UserDto>> getCurrentUser(
@@ -118,6 +118,8 @@ public class UserController {
                     content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "404", description = "User not found",
                     content = @Content(schema = @Schema(implementation = UsernameNotFoundException.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = InvalidCredentialsException.class))),
             @ApiResponse(responseCode = "422", description = "Validation failed due to invalid input parameters",
                     content = @Content(schema = @Schema(implementation = MethodArgumentNotValidException.class)))
     })
