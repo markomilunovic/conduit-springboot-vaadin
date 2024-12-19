@@ -48,7 +48,7 @@ public class UserController {
             @ApiResponse(responseCode = "422", description = "Validation failed due to invalid input parameters",
                     content = @Content(schema = @Schema(implementation = MethodArgumentNotValidException.class)))
     })
-    @PostMapping
+    @PostMapping("/users")
     public ResponseEntity<ResponseDto<UserDto>> register(@Valid @RequestBody RegisterUserDto registerUserDto) {
 
         log.info("Registering a new user with email: {}", registerUserDto.getEmail());
@@ -95,8 +95,10 @@ public class UserController {
             description = "Retrieves the current authenticated user's information."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "User retrieved successfully"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized")
+            @ApiResponse(responseCode = "200", description = "User retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = InvalidCredentialsException.class)))
     })
     @GetMapping("/user")
     public ResponseEntity<ResponseDto<UserDto>> getCurrentUser(
@@ -116,6 +118,8 @@ public class UserController {
                     content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "404", description = "User not found",
                     content = @Content(schema = @Schema(implementation = UsernameNotFoundException.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = InvalidCredentialsException.class))),
             @ApiResponse(responseCode = "422", description = "Validation failed due to invalid input parameters",
                     content = @Content(schema = @Schema(implementation = MethodArgumentNotValidException.class)))
     })

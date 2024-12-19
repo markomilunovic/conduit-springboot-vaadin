@@ -2,6 +2,7 @@ package com.example.conduit_springboot_vaadin.controller;
 
 import com.example.conduit_springboot_vaadin.dto.profile.ProfileDto;
 import com.example.conduit_springboot_vaadin.dto.user.ResponseDto;
+import com.example.conduit_springboot_vaadin.exception.InvalidCredentialsException;
 import com.example.conduit_springboot_vaadin.security.CustomUserDetails;
 import com.example.conduit_springboot_vaadin.service.ProfileService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -49,6 +50,30 @@ public class ProfileController {
         String currentUserId = (userDetails != null) ? userDetails.getId() : null;
         ProfileDto profile = profileService.getProfile(username, currentUserId);
         ResponseDto<ProfileDto> response = new ResponseDto<>(profile, "Profile retrieved successfully.");
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(
+            summary = "Follow User",
+            description = "Authenticated user follows another user by username."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successfully followed the user",
+                    content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request (e.g., already following, trying to follow self)",
+                    content = @Content(schema = @Schema(implementation = IllegalArgumentException.class))),
+            @ApiResponse(responseCode = "404", description = "Target user not found",
+                    content = @Content(schema = @Schema(implementation = UsernameNotFoundException.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = InvalidCredentialsException.class)))
+    })
+    @PostMapping("/{username}/follow")
+    public ResponseEntity<ResponseDto<ProfileDto>> followUser(
+            @PathVariable String username,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        ProfileDto updatedProfile = profileService.followUser(username, userDetails.getId());
+        ResponseDto<ProfileDto> response = new ResponseDto<>(updatedProfile, "Successfully followed the user.");
         return ResponseEntity.ok(response);
     }
 }
