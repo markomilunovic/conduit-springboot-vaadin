@@ -1,6 +1,7 @@
 package com.example.conduit_springboot_vaadin.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
  * the token's status, expiration, and timestamps for creation and updates.
  */
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "access_tokens")

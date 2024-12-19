@@ -1,6 +1,7 @@
 package com.example.conduit_springboot_vaadin.controller;
 
 import com.example.conduit_springboot_vaadin.dto.*;
+import com.example.conduit_springboot_vaadin.exception.InvalidCredentialsException;
 import com.example.conduit_springboot_vaadin.security.CustomUserDetails;
 import com.example.conduit_springboot_vaadin.security.CustomUserDetailsService;
 import com.example.conduit_springboot_vaadin.service.UserService;
@@ -34,13 +35,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    /**
-     * Registers a new user.
-     *
-     * @param registerUserDto The data transfer object containing user registration information.
-     * @return A {@link ResponseEntity} containing a {@link ResponseDto} with the registered {@link UserDto}
-     *         and a success message.
-     */
+
     @Operation(
             summary = "Register a new user",
             description = "Registers a new user and returns the user details along with a success message."
@@ -77,9 +72,11 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "Login successful",
                     content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "401", description = "Invalid login data",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    content = @Content(schema = @Schema(implementation = InvalidCredentialsException.class))),
             @ApiResponse(responseCode = "422", description = "Validation failed due to invalid input parameters",
-                    content = @Content(schema = @Schema(implementation = MethodArgumentNotValidException.class)))
+                    content = @Content(schema = @Schema(implementation = MethodArgumentNotValidException.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/users/login")
     public ResponseEntity<ResponseDto<AuthResponseDto>> login(@Valid @RequestBody LoginDto loginDto) {
@@ -95,12 +92,6 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Retrieves the current authenticated user's information.
-     *
-     * @param userDetails The {@link CustomUserDetails} of the authenticated user.
-     * @return A {@link ResponseEntity} containing the {@link UserDto} of the current user.
-     */
     @Operation(
             summary = "Get Current User",
             description = "Retrieves the current authenticated user's information."
