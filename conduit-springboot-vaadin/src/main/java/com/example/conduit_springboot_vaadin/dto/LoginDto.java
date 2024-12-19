@@ -3,6 +3,7 @@ package com.example.conduit_springboot_vaadin.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +13,7 @@ import lombok.NoArgsConstructor;
  * specifically the user's email and password.
  */
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoginDto {
