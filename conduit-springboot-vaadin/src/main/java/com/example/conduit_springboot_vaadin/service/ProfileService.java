@@ -88,6 +88,42 @@ public class ProfileService {
         log.info("User with ID: {} successfully followed user: {}", currentUserId, targetUsername);
 
         return profileMapper.userToProfileDto(targetUser, true);
+
+    }
+
+    /**
+     * Authenticated user unfollows the target user by username.
+     *
+     * @param targetUsername The username of the user to unfollow.
+     * @param currentUserId  The ID of the currently authenticated user.
+     * @return The updated ProfileDto of the target user with following status.
+     * @throws UsernameNotFoundException if the target user does not exist.
+     * @throws IllegalArgumentException  if the current user tries to unfollow themselves or does not follow the target user.
+     */
+    public ProfileDto unfollowUser(String targetUsername, String currentUserId) {
+
+        log.info("User with ID: {} is attempting to unfollow user: {}", currentUserId, targetUsername);
+
+        User targetUser = userRepository.findByUsername(targetUsername)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + targetUsername));
+
+        if (targetUser.getId().equals(currentUserId)) {
+            throw new IllegalArgumentException("Users cannot unfollow themselves.");
+        }
+
+        User currentUser = userRepository.findById(currentUserId)
+                .orElseThrow(() -> new UsernameNotFoundException("Authenticated user not found"));
+
+        if (!currentUser.getFollowing().contains(targetUser.getId())) {
+            throw new IllegalArgumentException("You are not following this user.");
+        }
+
+        currentUser.getFollowing().remove(targetUser.getId());
+        userRepository.save(currentUser);
+
+        log.info("User with ID: {} successfully unfollowed user: {}", currentUserId, targetUsername);
+
+        return profileMapper.userToProfileDto(targetUser, false);
     }
 
 }

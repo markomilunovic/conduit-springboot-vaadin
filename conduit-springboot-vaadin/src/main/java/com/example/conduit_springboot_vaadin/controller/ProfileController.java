@@ -76,4 +76,28 @@ public class ProfileController {
         ResponseDto<ProfileDto> response = new ResponseDto<>(updatedProfile, "Successfully followed the user.");
         return ResponseEntity.ok(response);
     }
+
+    @Operation(
+            summary = "Unfollow User",
+            description = "Authenticated user unfollows another user by username."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successfully unfollowed the user",
+                    content = @Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request (e.g., not following, trying to unfollow self)",
+                    content = @Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = IllegalArgumentException.class))),
+            @ApiResponse(responseCode = "404", description = "Target user not found",
+                    content = @Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = UsernameNotFoundException.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = InvalidCredentialsException.class)))
+    })
+    @DeleteMapping("/{username}/follow")
+    public ResponseEntity<ResponseDto<ProfileDto>> unfollowUser(
+            @PathVariable String username,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        ProfileDto updatedProfile = profileService.unfollowUser(username, userDetails.getId());
+        ResponseDto<ProfileDto> response = new ResponseDto<>(updatedProfile, "Successfully unfollowed the user.");
+        return ResponseEntity.ok(response);
+    }
 }
