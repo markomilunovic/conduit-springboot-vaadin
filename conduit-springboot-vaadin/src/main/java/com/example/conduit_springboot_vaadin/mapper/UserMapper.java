@@ -1,8 +1,7 @@
 package com.example.conduit_springboot_vaadin.mapper;
 
-import com.example.conduit_springboot_vaadin.dto.RegisterUserDto;
-import com.example.conduit_springboot_vaadin.dto.UpdateUserDto;
-import com.example.conduit_springboot_vaadin.dto.UserDto;
+import com.example.conduit_springboot_vaadin.dto.user.RegisterUserDto;
+import com.example.conduit_springboot_vaadin.dto.user.UserDto;
 import com.example.conduit_springboot_vaadin.model.User;
 import org.springframework.stereotype.Component;
 

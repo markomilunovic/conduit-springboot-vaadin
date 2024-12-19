@@ -1,9 +1,8 @@
 package com.example.conduit_springboot_vaadin.controller;
 
-import com.example.conduit_springboot_vaadin.dto.*;
+import com.example.conduit_springboot_vaadin.dto.user.*;
 import com.example.conduit_springboot_vaadin.exception.InvalidCredentialsException;
 import com.example.conduit_springboot_vaadin.security.CustomUserDetails;
-import com.example.conduit_springboot_vaadin.security.CustomUserDetailsService;
 import com.example.conduit_springboot_vaadin.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,7 +13,6 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.ErrorResponse;
