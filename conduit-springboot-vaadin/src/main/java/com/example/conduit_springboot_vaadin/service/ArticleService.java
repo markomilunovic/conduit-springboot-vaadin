@@ -2,6 +2,7 @@ package com.example.conduit_springboot_vaadin.service;
 
 import com.example.conduit_springboot_vaadin.dto.article.ArticleDto;
 import com.example.conduit_springboot_vaadin.dto.article.CreateArticleDto;
+import com.example.conduit_springboot_vaadin.exception.ArticleNotFoundException;
 import com.example.conduit_springboot_vaadin.mapper.ArticleMapper;
 import com.example.conduit_springboot_vaadin.model.Article;
 import com.example.conduit_springboot_vaadin.repository.ArticleRepository;
@@ -38,6 +39,14 @@ public class ArticleService{
         Article savedArticle = articleRepository.save(article);
 
         return articleMapper.articleToArticleDto(savedArticle, currentUserId);
+    }
+
+    public ArticleDto getArticleBySlug(String slug) {
+
+        Article article = articleRepository.findBySlug(slug)
+                .orElseThrow(() -> new ArticleNotFoundException(slug));
+
+        return articleMapper.articleToArticleDto(article, null);
     }
 
     /**

@@ -34,6 +34,9 @@ public class ArticleMapper {
     }
 
     public ArticleDto articleToArticleDto(Article article, String currentUserId) {
+
+        boolean isFavorited = currentUserId != null && article.getFavoritedBy().contains(currentUserId);
+
         return ArticleDto.builder()
                 .slug(article.getSlug())
                 .title(article.getTitle())
@@ -42,7 +45,7 @@ public class ArticleMapper {
                 .tagList(article.getTagList())
                 .createdAt(article.getCreatedAt())
                 .updatedAt(article.getUpdatedAt())
-                .favorited(article.getFavoritedBy().contains(currentUserId))
+                .favorited(isFavorited)
                 .favoritesCount(article.getFavoritedBy().size())
                 .author(authorMapper.userToAuthorDto(article.getAuthor(), currentUserId))
                 .build();

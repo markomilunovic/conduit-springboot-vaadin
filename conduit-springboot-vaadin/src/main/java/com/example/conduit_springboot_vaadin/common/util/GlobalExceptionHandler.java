@@ -1,6 +1,7 @@
 package com.example.conduit_springboot_vaadin.common.util;
 
 
+import com.example.conduit_springboot_vaadin.exception.ArticleNotFoundException;
 import com.example.conduit_springboot_vaadin.exception.InvalidCredentialsException;
 import com.example.conduit_springboot_vaadin.exception.UserAlreadyExistsException;
 import lombok.extern.slf4j.Slf4j;
@@ -114,6 +115,29 @@ public class GlobalExceptionHandler {
                 request.getDescription(false)
         );
         return new ResponseEntity<>(errorResponse, ex.getStatusCode());
+    }
+
+    /**
+     * Handles ArticleNotFoundException when an article with the specified slug is not found.
+     * <p>
+     * * This method captures {@link ArticleNotFoundException} instances, which indicate
+     * * that an attempt was made to retrieve or modify an article that does not exist in the system.
+     * * It constructs an error response with a specific message and HTTP 404 status code.
+     * * </p
+     * @param ex      The ArticleNotFoundException.
+     * @param request The current web request during which the exception occurred.
+     * @return A ResponseEntity with the standardized error response.
+     */
+    @ExceptionHandler(ArticleNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleArticleNotFoundException(ArticleNotFoundException ex, WebRequest request) {
+        log.warn("ArticleNotFoundException: {}", ex.getMessage());
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                ex.getMessage(),
+                request.getDescription(false)
+        );
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
 }

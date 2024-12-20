@@ -19,7 +19,7 @@ public class AuthorMapper {
         User author = userRepository.findByUsername(authorUsername)
                 .orElseThrow(() -> new RuntimeException("Author not found"));
 
-        boolean isFollowing = author.getFollowing().contains(currentUserId);
+        boolean isFollowing = currentUserId != null && author.getFollowing().contains(currentUserId);
 
         return AuthorDto.builder()
                 .username(author.getUsername())

@@ -70,5 +70,31 @@ public class ArticleController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @Operation(
+            summary = "Get an article by slug",
+            description = "Retrieves a single article based on the provided slug."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Article retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "404", description = "Article not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/{slug}")
+    public ResponseEntity<ResponseDto<ArticleResponseDto>> getArticle(
+            @PathVariable String slug
+    ) {
+
+        ArticleDto articleDto = articleService.getArticleBySlug(slug);
+
+        ArticleResponseDto responseDto = ArticleResponseDto.builder()
+                .article(articleDto)
+                .build();
+
+        ResponseDto<ArticleResponseDto> response = new ResponseDto<>(responseDto, "Article retrieved successfully.");
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 }
 
