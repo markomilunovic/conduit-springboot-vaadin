@@ -1,11 +1,13 @@
 package com.example.conduit_springboot_vaadin.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,6 +20,7 @@ import java.util.List;
  */
 @Document(collection = "articles")
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Article {
@@ -27,11 +30,11 @@ public class Article {
     private String title;
     private String description;
     private String body;
-    private List<String> tagList;
+    private List<String> tagList = new ArrayList<>();
     private Instant createdAt;
     private Instant updatedAt;
     private String author;
-    private List<String> favoritedBy;
+    private List<String> favoritedBy = new ArrayList<>();
 
 }
 
