@@ -26,6 +26,18 @@ public class ArticleService{
         this.articleMapper = articleMapper;
     }
 
+    /**
+     * Creates a new article with the provided details.
+     * <p>
+     * This method accepts a {@link CreateArticleDto} object containing details of the article to be created.
+     * It generates a unique slug based on the article title, maps the DTO to an {@link Article} entity,
+     * saves the article to the repository, and then maps the saved entity back to an {@link ArticleDto}.
+     * </p>
+     * @param createArticleDto The DTO containing article creation data.
+     * @param authorUsername   The username of the author creating the article.
+     * @param currentUserId    The ID of the current user performing the operation.
+     * @return The DTO representing the created article.
+     */
     public ArticleDto createArticle(
             CreateArticleDto createArticleDto,
             String authorUsername,
