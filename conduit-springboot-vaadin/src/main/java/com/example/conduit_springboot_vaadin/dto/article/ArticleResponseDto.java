@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
  * Wrapper DTO for article responses.
  */
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class ArticleResponseDto {
 
     @Schema(description = "Article data in response")

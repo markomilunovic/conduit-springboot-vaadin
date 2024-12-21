@@ -1,6 +1,7 @@
 package com.example.conduit_springboot_vaadin.mapper;
 
 import com.example.conduit_springboot_vaadin.dto.article.ArticleDto;
+import com.example.conduit_springboot_vaadin.dto.article.ArticleListDto;
 import com.example.conduit_springboot_vaadin.dto.article.CreateArticleDto;
 import com.example.conduit_springboot_vaadin.model.Article;
 import org.springframework.stereotype.Component;
@@ -42,6 +43,23 @@ public class ArticleMapper {
                 .title(article.getTitle())
                 .description(article.getDescription())
                 .body(article.getBody())
+                .tagList(article.getTagList())
+                .createdAt(article.getCreatedAt())
+                .updatedAt(article.getUpdatedAt())
+                .favorited(isFavorited)
+                .favoritesCount(article.getFavoritedBy().size())
+                .author(authorMapper.userToAuthorDto(article.getAuthor(), currentUserId))
+                .build();
+    }
+
+    public ArticleListDto articleToArticleListDto(Article article, String currentUserId) {
+
+        boolean isFavorited = currentUserId != null && article.getFavoritedBy().contains(currentUserId);
+
+        return ArticleListDto.builder()
+                .slug(article.getSlug())
+                .title(article.getTitle())
+                .description(article.getDescription())
                 .tagList(article.getTagList())
                 .createdAt(article.getCreatedAt())
                 .updatedAt(article.getUpdatedAt())
