@@ -19,6 +19,7 @@ import com.example.conduit_springboot_vaadin.dto.article.ArticleListResponseDto;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -195,6 +196,43 @@ public class ArticleService{
         return response;
     }
 
+    public ArticleListResponseDto getFeed(String currentUserId, int limit, int offset) {
+        log.info("Generating feed for user with ID: {}", currentUserId);
+
+        User currentUser = userRepository.findById(currentUserId)
+                .orElseThrow(() -> new RuntimeException("Current user not found with ID: " + currentUserId));
+
+        List<String> followedUserIds = currentUser.getFollowing();
+        if (followedUserIds.isEmpty()) {
+            return new ArticleListResponseDto(List.of(), 0);
+        }
+
+        List<String> followedUsernames = followedUserIds.stream()
+                .map(id -> userRepository.findById(id).orElse(null))
+                .filter(Objects::nonNull)
+                .map(User::getUsername)
+                .toList();
+
+        if (followedUsernames.isEmpty()) {
+            return new ArticleListResponseDto(List.of(), 0);
+        }
+
+        PageRequest pageRequest = PageRequest.of(offset / limit, limit, Sort.by(Sort.Direction.DESC, "createdAt"));
+        log.debug("Feed PageRequest created: page={}, size={}, sort=createdAt DESC", offset / limit, limit);
+
+        Page<Article> page = articleRepository.findByAuthorIn(followedUsernames, pageRequest);
+
+        List<ArticleListDto> articleListDtos = page.getContent().stream()
+                .map(article -> articleMapper.articleToArticleListDto(article, currentUserId))
+                .toList();
+
+        log.info("Returning feed with {} articles out of total {}", articleListDtos.size(), page.getTotalElements());
+
+        return ArticleListResponseDto.builder()
+                .articles(articleListDtos)
+                .articlesCount((int) page.getTotalElements())
+                .build();
+    }
 
     /**
      * Generates a unique slug for the article based on its title.

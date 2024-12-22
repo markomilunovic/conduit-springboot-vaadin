@@ -1,18 +1,19 @@
 package com.example.conduit_springboot_vaadin.repository;
 
 import com.example.conduit_springboot_vaadin.model.Article;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.lang.NonNull;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ArticleRepository extends MongoRepository<Article, String> {
     Optional<Article> findBySlug(String slug);
     boolean existsBySlug(String slug);
 
-    Page<Article> findAll(@NotNull Pageable page);
+    @NonNull Page<Article> findAll(@NonNull Pageable page);
 
     Page<Article> findByAuthor(String author, Pageable page);
 
@@ -27,4 +28,6 @@ public interface ArticleRepository extends MongoRepository<Article, String> {
     Page<Article> findByTagListAndFavoritedBy(String tag, String userId, Pageable page);
 
     Page<Article> findByAuthorAndTagListAndFavoritedBy(String author, String tag, String userId, Pageable page);
+
+    Page<Article> findByAuthorIn(List<String> authors, Pageable pageable);
 }

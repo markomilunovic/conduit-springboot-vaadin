@@ -166,5 +166,44 @@ public class ArticleController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(
+            summary = "Get article feed",
+            description = "Retrieves articles from followed users, ordered by most recent first. Authentication required."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Feed retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/feed")
+    public ResponseEntity<ResponseDto<Map<String, Object>>> getFeed(
+            @RequestParam(defaultValue = "20") int limit,
+            @RequestParam(defaultValue = "0") int offset,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        log.info("Request received for retrieving feed articles with limit={}, offset={}", limit, offset);
+
+        String currentUserId = userDetails.getId();
+
+        ArticleListResponseDto feedDto = articleService.getFeed(currentUserId, limit, offset);
+
+        Map<String, Object> responseData = Map.of(
+                "articles", feedDto.getArticles(),
+                "articlesCount", feedDto.getArticlesCount()
+        );
+
+        ResponseDto<Map<String, Object>> response = new ResponseDto<>(
+                responseData,
+                "Feed retrieved successfully."
+        );
+
+        log.info("Returning feed with {} articles and articlesCount={}",
+                feedDto.getArticles().size(), feedDto.getArticlesCount());
+
+        return ResponseEntity.ok(response);
+    }
+
+
 }
 
