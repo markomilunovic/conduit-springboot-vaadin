@@ -11,9 +11,9 @@ import java.util.List;
 @AllArgsConstructor
 public class ArticleListResponseDto {
 
-    @Schema
+    @Schema(description = "List of all the articles.")
     private List<ArticleListDto> articles;
 
-    @Schema
+    @Schema(description = "Number of articles retrieved")
     private int articlesCount;
 }

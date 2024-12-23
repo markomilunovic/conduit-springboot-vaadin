@@ -3,10 +3,7 @@ package com.example.conduit_springboot_vaadin.controller;
 import com.example.conduit_springboot_vaadin.common.util.ErrorResponse;
 import com.example.conduit_springboot_vaadin.common.util.ValidationErrorResponse;
 import com.example.conduit_springboot_vaadin.dto.article.*;
-import com.example.conduit_springboot_vaadin.dto.comment.AddCommentDto;
-import com.example.conduit_springboot_vaadin.dto.comment.AddCommentRequestDto;
-import com.example.conduit_springboot_vaadin.dto.comment.CommentDto;
-import com.example.conduit_springboot_vaadin.dto.comment.CommentResponseDto;
+import com.example.conduit_springboot_vaadin.dto.comment.*;
 import com.example.conduit_springboot_vaadin.dto.user.ResponseDto;
 import com.example.conduit_springboot_vaadin.security.CustomUserDetails;
 import com.example.conduit_springboot_vaadin.service.ArticleService;
@@ -24,6 +21,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import com.example.conduit_springboot_vaadin.dto.article.ArticleListResponseDto;
 
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -300,6 +298,30 @@ public class ArticleController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(
+            summary = "Add a new comment",
+            description = "Adds a new comment with the provided body."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Comment added successfully",
+                    content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(
+                    responseCode = "422",
+                    description = "Validation failed due to invalid input parameters",
+                    content = @Content(schema = @Schema(implementation = ValidationErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Article not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            )
+    })
     @PostMapping("/{slug}/comments")
     public ResponseEntity<ResponseDto<CommentResponseDto>> addCommentToArticle(
             @PathVariable String slug,
@@ -326,6 +348,42 @@ public class ArticleController {
 
         return ResponseEntity.ok(response);
     }
+
+    @Operation(
+            summary = "List comments",
+            description = "Lists comments for a specific article."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Comments retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Article not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/{slug}/comments")
+    public ResponseEntity<ResponseDto<ListCommentDto>> getCommentsForArticle(
+            @PathVariable String slug,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+
+        log.info("Request received to fetch comments for article: {}", slug);
+
+        String currentUserId = (userDetails != null) ? userDetails.getId() : null;
+
+        List<CommentDto> commentDtos = articleService.getCommentsFromArticle(slug, currentUserId);
+
+        ListCommentDto listCommentDto = ListCommentDto.builder()
+                .comments(commentDtos)
+                .build();
+
+        ResponseDto<ListCommentDto> response = new ResponseDto<>(listCommentDto, "Comments retrieved successfully.");
+
+        return ResponseEntity.ok(response);
+    }
+
 
 
 }

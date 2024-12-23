@@ -397,6 +397,40 @@ public class ArticleService{
         log.info("Comment added successfully: {}", savedComment.getId());
         log.debug("savedComment created with data: {}", savedComment);
 
-        return commentMapper.commentToCommentDto(savedComment, currentUserId, article.getAuthor());
+        return commentMapper.commentToCommentDto(savedComment, currentUserId, comment.getAuthor());
     }
+
+    /**
+     * Retrieves a list of comments associated with a specific article identified by its slug.
+     * <p>
+     * This method logs the retrieval request, verifies the existence of the article by its slug,
+     * and fetches the associated comments. Each {@link Comment}
+     * is then mapped to a {@link CommentDto} based on the current user's context. Finally, it returns
+     * a list of {@link CommentDto} objects representing the article's comments.
+     * </p>
+     *
+     * @param slug           The unique slug identifier of the article for which comments are to be fetched.
+     * @param currentUserId  The ID of the currently authenticated user.
+     * @return               A {@link List} of {@link CommentDto} objects containing the details of each comment associated
+     *                       with the specified article.
+     * @throws ArticleNotFoundException if no article exists with the provided slug.
+     */
+    public List<CommentDto> getCommentsFromArticle(String slug, String currentUserId) {
+
+        log.info("Fetching comments for article: {}", slug);
+
+        if(!articleRepository.existsBySlug(slug)) {
+            throw new ArticleNotFoundException(slug);
+        }
+
+        List<Comment> comments = commentRepository.findByArticle(slug);
+
+        log.info("Comments fetched successfully for article: {}", slug);
+
+        return comments.stream()
+                .map(comment -> commentMapper.commentToCommentDto(comment, currentUserId, comment.getAuthor()))
+                .toList();
+    }
+
+
 }
