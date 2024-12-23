@@ -6,6 +6,7 @@ import com.example.conduit_springboot_vaadin.dto.comment.CommentDto;
 import com.example.conduit_springboot_vaadin.dto.comment.CommentResponseDto;
 import com.example.conduit_springboot_vaadin.exception.AccessDeniedException;
 import com.example.conduit_springboot_vaadin.exception.ArticleNotFoundException;
+import com.example.conduit_springboot_vaadin.exception.CommentNotFoundException;
 import com.example.conduit_springboot_vaadin.mapper.ArticleMapper;
 import com.example.conduit_springboot_vaadin.mapper.CommentMapper;
 import com.example.conduit_springboot_vaadin.model.Article;
@@ -430,6 +431,39 @@ public class ArticleService{
         return comments.stream()
                 .map(comment -> commentMapper.commentToCommentDto(comment, currentUserId, comment.getAuthor()))
                 .toList();
+    }
+
+    /**
+     * Deletes a comment identified by its ID and associated article slug.
+     * <p>
+     * This method logs the deletion request, fetches the comment by its ID and article slug,
+     * verifies that the current user is the author of the comment, and deletes the comment
+     * from the repository.
+     * </p>
+     *
+     * @param slug           The unique slug identifier of the article.
+     * @param commentId      The unique identifier of the comment to be deleted.
+     * @param currentUsername The username of the currently authenticated user attempting the deletion.
+     * @throws CommentNotFoundException if no comment exists with the provided ID for the specified article.
+     * @throws AccessDeniedException    if the current user is not the author of the comment.
+     */
+    public void deleteComment(String slug, String commentId, String currentUsername) {
+
+        log.info("Request received to delete comment with ID: {} from article: {}", commentId, slug);
+
+        Comment comment = commentRepository.findByIdAndArticle(commentId, slug)
+                .orElseThrow(() -> new CommentNotFoundException(commentId, slug));
+
+        log.debug("Comment found: {}", comment);
+
+        if (!comment.getAuthor().equals(currentUsername)) {
+            log.warn("User '{}' attempted to delete comment '{}' authored by '{}'",
+                    currentUsername, commentId, comment.getAuthor());
+            throw new AccessDeniedException("You are not authorized to delete this comment.");
+        }
+
+        commentRepository.delete(comment);
+        log.info("Comment with ID: {} successfully deleted from article: {}", commentId, slug);
     }
 
 

@@ -384,6 +384,51 @@ public class ArticleController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(
+            summary = "Delete a comment",
+            description = "Deletes a specific comment from an article. Only the comment's author can perform this action."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Comment deleted successfully",
+                    content = @Content(schema = @Schema(implementation = ResponseDto.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - authentication is required",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden - user is not the author of the comment",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Comment or article not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            )
+    })
+    @DeleteMapping("/{slug}/comments/{id}")
+    public ResponseEntity<ResponseDto<Void>> deleteComment(
+            @PathVariable String slug,
+            @PathVariable("id") String commentId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        log.info("Request received to delete comment with ID: {} from article: {}", commentId, slug);
+
+        String currentUsername = userDetails.getUsername();
+
+        articleService.deleteComment(slug, commentId, currentUsername);
+
+        ResponseDto<Void> response = new ResponseDto<>(null, "Comment deleted successfully.");
+
+        log.info("Comment with ID: {} deleted successfully from article: {}", commentId, slug);
+
+        return ResponseEntity.ok(response);
+    }
+
 
 
 }
