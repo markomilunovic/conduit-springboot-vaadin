@@ -268,6 +268,33 @@ public class ArticleController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(
+            summary = "Delete an article",
+            description = "Deletes the article identified by the slug."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Article deleted successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden - user not author of the article",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Article not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @DeleteMapping("/{slug}")
+    public ResponseEntity<ResponseDto<Void>> deleteArticle(
+            @PathVariable String slug,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        log.info("Request received to delete article with slug: '{}'", slug);
+        String currentUsername = userDetails.getUsername();
+
+        articleService.deleteArticle(slug, currentUsername);
+
+        ResponseDto<Void> response = new ResponseDto<>(null, "Article deleted successfully.");
+        return ResponseEntity.ok(response);
+    }
+
 
 }
 

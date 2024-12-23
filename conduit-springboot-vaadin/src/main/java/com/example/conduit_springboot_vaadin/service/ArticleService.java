@@ -311,6 +311,31 @@ public class ArticleService{
     }
 
     /**
+     * Deletes an article by its slug.
+     * <p>
+     * Only the article's author can perform this deletion; otherwise,
+     * an {@link AccessDeniedException} is thrown.
+     * </p>
+     *
+     * @param slug            The slug of the article to delete.
+     * @param currentUsername The username of the currently authenticated user.
+     * @throws ArticleNotFoundException If no article is found with the provided slug.
+     * @throws AccessDeniedException    If the current user is not the author of the article.
+     */
+    public void deleteArticle(String slug, String currentUsername) {
+        Article article = articleRepository.findBySlug(slug)
+                .orElseThrow(() -> new ArticleNotFoundException(slug));
+
+        if (!article.getAuthor().equals(currentUsername)) {
+            log.warn("User '{}' attempted to delete article by author '{}'", currentUsername, article.getAuthor());
+            throw new AccessDeniedException("You are not allowed to delete this article.");
+        }
+
+        articleRepository.delete(article);
+        log.info("Article with slug '{}' has been deleted successfully by user '{}'.", slug, currentUsername);
+    }
+
+    /**
      * Generates a unique slug for the article based on its title.
      *
      * @param title The title of the article.
