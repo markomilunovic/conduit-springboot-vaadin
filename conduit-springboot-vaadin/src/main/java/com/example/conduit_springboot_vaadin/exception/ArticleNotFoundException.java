@@ -12,6 +12,6 @@ import org.springframework.web.server.ResponseStatusException;
  */
 public class ArticleNotFoundException extends ResponseStatusException {
     public ArticleNotFoundException(String slug) {
-        super(HttpStatus.NOT_FOUND, "Book with id " + slug + " not found.");
+        super(HttpStatus.NOT_FOUND, "Article with id " + slug + " not found.");
     }
 }

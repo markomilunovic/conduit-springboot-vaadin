@@ -1,12 +1,18 @@
 package com.example.conduit_springboot_vaadin.service;
 
 import com.example.conduit_springboot_vaadin.dto.article.*;
+import com.example.conduit_springboot_vaadin.dto.comment.AddCommentDto;
+import com.example.conduit_springboot_vaadin.dto.comment.CommentDto;
+import com.example.conduit_springboot_vaadin.dto.comment.CommentResponseDto;
 import com.example.conduit_springboot_vaadin.exception.AccessDeniedException;
 import com.example.conduit_springboot_vaadin.exception.ArticleNotFoundException;
 import com.example.conduit_springboot_vaadin.mapper.ArticleMapper;
+import com.example.conduit_springboot_vaadin.mapper.CommentMapper;
 import com.example.conduit_springboot_vaadin.model.Article;
+import com.example.conduit_springboot_vaadin.model.Comment;
 import com.example.conduit_springboot_vaadin.model.User;
 import com.example.conduit_springboot_vaadin.repository.ArticleRepository;
+import com.example.conduit_springboot_vaadin.repository.CommentRepository;
 import com.example.conduit_springboot_vaadin.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -28,15 +34,21 @@ public class ArticleService{
     private final ArticleRepository articleRepository;
     private final ArticleMapper articleMapper;
     private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
+    private final CommentMapper commentMapper;
 
     public ArticleService (
             ArticleRepository articleRepository,
             ArticleMapper articleMapper,
-            UserRepository userRepository
+            UserRepository userRepository,
+            CommentMapper commentMapper,
+            CommentRepository commentRepository
     ) {
         this.articleRepository = articleRepository;
         this.articleMapper = articleMapper;
         this.userRepository = userRepository;
+        this.commentMapper = commentMapper;
+        this.commentRepository = commentRepository;
     }
 
     /**
@@ -355,5 +367,36 @@ public class ArticleService{
         }
 
         return slug;
+    }
+
+    /**
+     * Adds a new comment to the specified article.
+     * <p>
+     * This method retrieves the article identified by its slug and, if it exists,
+     * creates a new comment using the provided comment body. The comment is associated
+     * with the article slug and with the username of the user making the request.
+     * </p>
+     *
+     * @param slug            The slug of the article to which the comment is being added.
+     * @param addCommentDto   A DTO containing the body text of the comment.
+     * @param currentUsername The username of the authenticated user adding the comment.
+     * @param currentUserId   The ID of the authenticated user.
+     * @return A {@link CommentDto} representing the newly created comment, including its ID, body, timestamps, and author details.
+     * @throws ArticleNotFoundException If no article is found with the given slug.
+     */
+    public CommentDto addCommentToArticle(String slug, AddCommentDto addCommentDto, String currentUsername, String currentUserId) {
+
+        log.info("Adding comment to article with slug: {}", slug);
+
+        Article article = articleRepository.findBySlug(slug)
+                .orElseThrow(() -> new ArticleNotFoundException(slug));
+
+        Comment comment = commentMapper.addCommentDtoToComment(addCommentDto, currentUsername, article.getSlug());
+        Comment savedComment = commentRepository.save(comment);
+
+        log.info("Comment added successfully: {}", savedComment.getId());
+        log.debug("savedComment created with data: {}", savedComment);
+
+        return commentMapper.commentToCommentDto(savedComment, currentUserId, article.getAuthor());
     }
 }

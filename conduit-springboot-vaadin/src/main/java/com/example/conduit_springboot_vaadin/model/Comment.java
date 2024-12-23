@@ -1,6 +1,7 @@
 package com.example.conduit_springboot_vaadin.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
@@ -16,6 +17,7 @@ import java.time.Instant;
  */
 @Document(collection = "comments")
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Comment {

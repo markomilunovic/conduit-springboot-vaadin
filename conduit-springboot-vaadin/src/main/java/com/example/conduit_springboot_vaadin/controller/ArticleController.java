@@ -3,6 +3,10 @@ package com.example.conduit_springboot_vaadin.controller;
 import com.example.conduit_springboot_vaadin.common.util.ErrorResponse;
 import com.example.conduit_springboot_vaadin.common.util.ValidationErrorResponse;
 import com.example.conduit_springboot_vaadin.dto.article.*;
+import com.example.conduit_springboot_vaadin.dto.comment.AddCommentDto;
+import com.example.conduit_springboot_vaadin.dto.comment.AddCommentRequestDto;
+import com.example.conduit_springboot_vaadin.dto.comment.CommentDto;
+import com.example.conduit_springboot_vaadin.dto.comment.CommentResponseDto;
 import com.example.conduit_springboot_vaadin.dto.user.ResponseDto;
 import com.example.conduit_springboot_vaadin.security.CustomUserDetails;
 import com.example.conduit_springboot_vaadin.service.ArticleService;
@@ -273,7 +277,8 @@ public class ArticleController {
             description = "Deletes the article identified by the slug."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Article deleted successfully"),
+            @ApiResponse(responseCode = "204", description = "Article deleted successfully",
+                    content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = "Forbidden - user not author of the article",
@@ -292,6 +297,33 @@ public class ArticleController {
         articleService.deleteArticle(slug, currentUsername);
 
         ResponseDto<Void> response = new ResponseDto<>(null, "Article deleted successfully.");
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{slug}/comments")
+    public ResponseEntity<ResponseDto<CommentResponseDto>> addCommentToArticle(
+            @PathVariable String slug,
+            @Valid @RequestBody AddCommentRequestDto addCommentRequestDto,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+
+        log.info("Request received to add comment to article with slug: {}", slug);
+
+        String currentUsername = userDetails.getUsername();
+        String currentUserId = userDetails.getId();
+        AddCommentDto addCommentDto = addCommentRequestDto.getComment();
+
+        CommentDto commentDto = articleService.addCommentToArticle(slug, addCommentDto, currentUsername, currentUserId);
+
+        CommentResponseDto commentResponseDto = CommentResponseDto.builder()
+                .comment(commentDto)
+                .build();
+
+        log.info("Comment created successfully: {}", commentDto.getId());
+        log.debug("Comment created with data: {}", commentDto);
+
+        ResponseDto<CommentResponseDto> response = new ResponseDto<>(commentResponseDto, "Comment added successfully.");
+
         return ResponseEntity.ok(response);
     }
 
