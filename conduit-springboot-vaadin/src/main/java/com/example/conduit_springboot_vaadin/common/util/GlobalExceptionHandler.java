@@ -1,6 +1,7 @@
 package com.example.conduit_springboot_vaadin.common.util;
 
 
+import com.example.conduit_springboot_vaadin.exception.AccessDeniedException;
 import com.example.conduit_springboot_vaadin.exception.ArticleNotFoundException;
 import com.example.conduit_springboot_vaadin.exception.InvalidCredentialsException;
 import com.example.conduit_springboot_vaadin.exception.UserAlreadyExistsException;
@@ -138,6 +139,27 @@ public class GlobalExceptionHandler {
         );
 
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    /**
+     * Handles AccessDeniedException when a user attempts to update an article that they do not own.
+     * <p>
+     * * This method captures {@link AccessDeniedException} instances, which indicate
+     * * that an attempt was made modify an article that the user does not have the permission to update.
+     * * It constructs an error response with a specific message and HTTP 403 status code.
+     * * </p
+     * @param ex      The AccessDeniedException.
+     * @param request The current web request during which the exception occurred.
+     * @return A ResponseEntity with the standardized error response.
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ex, WebRequest request) {
+        log.warn("AccessDeniedException: {}", ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(
+                ex.getMessage(),
+                request.getDescription(false)
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
     }
 
 }

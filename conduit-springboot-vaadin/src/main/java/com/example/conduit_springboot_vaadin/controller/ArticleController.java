@@ -204,6 +204,70 @@ public class ArticleController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(
+            summary = "Update an existing article",
+            description = "Updates article fields (title, description, body)."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Article updated successfully",
+                    content = @Content(schema = @Schema(implementation = ResponseDto.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden - user not author of this article",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Article not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "422",
+                    description = "Validation failed due to invalid input parameters",
+                    content = @Content(schema = @Schema(implementation = ValidationErrorResponse.class))
+            )
+    })
+    @PutMapping("/{slug}")
+    public ResponseEntity<ResponseDto<ArticleResponseDto>> updateArticle(
+            @PathVariable String slug,
+            @Valid @RequestBody UpdateArticleRequestDto updateArticleRequestDto,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        log.info("Request received to update article with slug: {}", slug);
+
+        UpdateArticleDto updateArticleDto = updateArticleRequestDto.getArticle();
+        String currentUserId = userDetails.getId();
+        String currentUsername = userDetails.getUsername();
+
+        ArticleDto updatedArticleDto = articleService.updateArticle(
+                slug,
+                updateArticleDto,
+                currentUserId,
+                currentUsername
+        );
+
+        ArticleResponseDto responseDto = ArticleResponseDto.builder()
+                .article(updatedArticleDto)
+                .build();
+
+        log.debug("Article updated: {}", updatedArticleDto);
+
+        ResponseDto<ArticleResponseDto> response = new ResponseDto<>(
+                responseDto,
+                "Article updated successfully."
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
 
 }
 

@@ -1,8 +1,7 @@
 package com.example.conduit_springboot_vaadin.service;
 
-import com.example.conduit_springboot_vaadin.dto.article.ArticleDto;
-import com.example.conduit_springboot_vaadin.dto.article.ArticleListDto;
-import com.example.conduit_springboot_vaadin.dto.article.CreateArticleDto;
+import com.example.conduit_springboot_vaadin.dto.article.*;
+import com.example.conduit_springboot_vaadin.exception.AccessDeniedException;
 import com.example.conduit_springboot_vaadin.exception.ArticleNotFoundException;
 import com.example.conduit_springboot_vaadin.mapper.ArticleMapper;
 import com.example.conduit_springboot_vaadin.model.Article;
@@ -15,8 +14,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.example.conduit_springboot_vaadin.dto.article.ArticleListResponseDto;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -196,6 +195,22 @@ public class ArticleService{
         return response;
     }
 
+    /**
+     * Retrieves a personalized feed of articles for the current user.
+     * <p>
+     * This method generates a feed consisting of the most recent articles
+     * written by users followed by the current user. The feed is paginated
+     * based on the specified limit and offset parameters, and articles
+     * are sorted by their creation date in descending order (most recent first).
+     * If the user does not follow any other users, the feed will be empty.
+     * </p>
+     *
+     * @param currentUserId The ID of the currently authenticated user requesting the feed.
+     * @param limit         The maximum number of articles to return in the feed (pagination size).
+     * @param offset        The number of articles to skip before starting to collect results (pagination offset).
+     * @return An {@link ArticleListResponseDto} containing the list of articles in the feed and the total article count.
+     * @throws RuntimeException If the current user is not found in the system.
+     */
     public ArticleListResponseDto getFeed(String currentUserId, int limit, int offset) {
         log.info("Generating feed for user with ID: {}", currentUserId);
 
@@ -232,6 +247,67 @@ public class ArticleService{
                 .articles(articleListDtos)
                 .articlesCount((int) page.getTotalElements())
                 .build();
+    }
+
+    /**
+     * Updates an existing article identified by its slug.
+     * <p>
+     * This method allows the author of an article to update its title, description, or body.
+     * If the title is updated, a new unique slug is generated for the article. The method
+     * also updates the `updatedAt` timestamp to reflect the modification time. Only the
+     * author of the article is permitted to make updates; otherwise, an exception is thrown.
+     * </p>
+     *
+     * @param slug           The unique identifier (slug) of the article to be updated.
+     * @param updateDto      A DTO containing the updated article fields.
+     * @param currentUserId  The ID of the currently authenticated user making the request.
+     * @param currentUsername The username of the currently authenticated user making the request.
+     * @return An {@link ArticleDto} containing the updated article details.
+     * @throws ArticleNotFoundException If no article is found with the provided slug.
+     * @throws AccessDeniedException    If the current user is not the author of the article.
+     */
+    public ArticleDto updateArticle(
+            String slug,
+            UpdateArticleDto updateDto,
+            String currentUserId,
+            String currentUsername
+    ) {
+        log.info("Updating article with slug: {}", slug);
+        log.debug("Updating article with data: {}", updateDto);
+        log.debug("Logged user ID: {}", currentUserId);
+        log.debug("Logged user username: {}", currentUsername);
+
+        Article article = articleRepository.findBySlug(slug)
+                .orElseThrow(() -> new ArticleNotFoundException(slug));
+
+        if (!article.getAuthor().equals(currentUsername)) {
+            log.warn("User {} tried to update article by author {}", currentUsername, article.getAuthor());
+            throw new AccessDeniedException("You are not allowed to update this article.");
+        }
+
+        if (updateDto.getTitle() != null && !updateDto.getTitle().isBlank()) {
+            String newTitle = updateDto.getTitle().trim();
+
+            if (!article.getTitle().equals(newTitle)) {
+                log.info("Title updated from '{}' to '{}'.", article.getTitle(), newTitle);
+                article.setTitle(newTitle);
+                String newSlug = generateUniqueSlug(newTitle);
+                article.setSlug(newSlug);
+            }
+        }
+        if (updateDto.getDescription() != null && !updateDto.getDescription().isBlank()) {
+            article.setDescription(updateDto.getDescription().trim());
+        }
+        if (updateDto.getBody() != null && !updateDto.getBody().isBlank()) {
+            article.setBody(updateDto.getBody().trim());
+        }
+
+        article.setUpdatedAt(Instant.now());
+
+        Article savedArticle = articleRepository.save(article);
+        log.info("Article with slug '{}' updated successfully.", savedArticle.getSlug());
+
+        return articleMapper.articleToArticleDto(savedArticle, currentUserId);
     }
 
     /**
