@@ -466,5 +466,44 @@ public class ArticleService{
         log.info("Comment with ID: {} successfully deleted from article: {}", commentId, slug);
     }
 
+    /**
+     * Favorites an article identified by its slug for the current user.
+     * <p>
+     * This method performs the following operations:
+     * - Logs the favorite request.
+     * - Retrieves the article by slug, throwing {@link ArticleNotFoundException} if it doesn't exist.
+     * - Checks if the current user has already favorited the article.
+     * - Adds the user to the `favoritedBy` list if not already present.
+     * - Saves the updated article to the repository.
+     * - Maps the updated article to {@link ArticleDto} and returns it.
+     * </p>
+     *
+     * @param slug           The unique slug identifier of the article to be favorited.
+     * @param currentUserId  The ID of the currently authenticated user performing the favoriting action.
+     * @return               An {@link ArticleDto} representing the favorited article.
+     * @throws ArticleNotFoundException if no article exists with the provided slug.
+     */
+    public ArticleDto favoriteArticle(String slug, String currentUserId) {
+
+        log.info("Saving as favorite article with slug: {}", slug);
+
+        Article article = articleRepository.findBySlug(slug)
+                .orElseThrow(() -> new ArticleNotFoundException(slug));
+
+        log.debug("Article found: {}", article);
+
+        if (!article.getFavoritedBy().contains(currentUserId)) {
+            article.getFavoritedBy().add(currentUserId);
+            log.info("User with ID: {} favorited article: {}", currentUserId, slug);
+        } else {
+            throw new IllegalArgumentException("You have already favorited this article.");
+        }
+
+        Article favoritedArticle = articleRepository.save(article);
+        log.info("Article with slug '{}' updated successfully with new favorite.", slug);
+        log.debug("Updated article data: {}", favoritedArticle);
+
+        return articleMapper.articleToArticleDto(favoritedArticle, currentUserId);
+    }
 
 }

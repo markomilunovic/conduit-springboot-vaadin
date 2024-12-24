@@ -429,6 +429,49 @@ public class ArticleController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(
+            summary = "Favorite an article",
+            description = "Allows an authenticated user to favorite a specific article."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Article favorited successfully",
+                    content = @Content(schema = @Schema(implementation = ResponseDto.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - authentication is required",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Article not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            )
+    })
+    @PostMapping("/{slug}/favorite")
+    public ResponseEntity<ResponseDto<ArticleResponseDto>> favoriteArticle(
+            @PathVariable String slug,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        log.info("Request received to favorite article with slug: {}", slug);
+
+        String currentUserId = userDetails.getId();
+
+        ArticleDto favoritedArticleDto = articleService.favoriteArticle(slug, currentUserId);
+
+        ArticleResponseDto responseDto = ArticleResponseDto.builder()
+                .article(favoritedArticleDto)
+                .build();
+
+        ResponseDto<ArticleResponseDto> response = new ResponseDto<>(responseDto, "Article favorited successfully.");
+
+        log.info("Article with slug '{}' favorited successfully by user ID: {}", slug, currentUserId);
+        log.debug("Updated ArticleDto: {}", favoritedArticleDto);
+
+        return ResponseEntity.ok(response);
+    }
 
 
 }
