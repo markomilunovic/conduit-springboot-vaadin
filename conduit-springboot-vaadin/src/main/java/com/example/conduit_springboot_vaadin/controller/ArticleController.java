@@ -396,7 +396,7 @@ public class ArticleController {
             ),
             @ApiResponse(
                     responseCode = "401",
-                    description = "Unauthorized - authentication is required",
+                    description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))
             ),
             @ApiResponse(
@@ -441,12 +441,17 @@ public class ArticleController {
             ),
             @ApiResponse(
                     responseCode = "401",
-                    description = "Unauthorized - authentication is required",
+                    description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))
             ),
             @ApiResponse(
                     responseCode = "404",
                     description = "Article not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Article already favorited",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))
             )
     })
@@ -468,7 +473,56 @@ public class ArticleController {
         ResponseDto<ArticleResponseDto> response = new ResponseDto<>(responseDto, "Article favorited successfully.");
 
         log.info("Article with slug '{}' favorited successfully by user ID: {}", slug, currentUserId);
-        log.debug("Updated ArticleDto: {}", favoritedArticleDto);
+        log.debug("Favorited ArticleDto: {}", favoritedArticleDto);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(
+            summary = "Unfavorite an article",
+            description = "Allows an authenticated user to unfavorite a specific article."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Article unfavorited successfully",
+                    content = @Content(schema = @Schema(implementation = ResponseDto.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Article not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Article already unfavorited",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            )
+    })
+    @DeleteMapping("/{slug}/favorite")
+    public ResponseEntity<ResponseDto<ArticleResponseDto>> unfavoriteArticle(
+            @PathVariable String slug,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        log.info("Request received to unfavorite article with slug: {}", slug);
+
+        String currentUserId = userDetails.getId();
+
+        ArticleDto unfavoritedArticleDto = articleService.unfavoriteArticle(slug, currentUserId);
+
+        ArticleResponseDto responseDto = ArticleResponseDto.builder()
+                .article(unfavoritedArticleDto)
+                .build();
+
+        ResponseDto<ArticleResponseDto> response = new ResponseDto<>(responseDto, "Article unfavorited successfully.");
+
+        log.info("Article with slug '{}' unfavorited successfully by user ID: {}", slug, currentUserId);
+        log.debug("Unfavorited ArticleDto: {}", unfavoritedArticleDto);
 
         return ResponseEntity.ok(response);
     }

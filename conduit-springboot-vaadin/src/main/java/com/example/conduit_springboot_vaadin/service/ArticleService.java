@@ -3,7 +3,6 @@ package com.example.conduit_springboot_vaadin.service;
 import com.example.conduit_springboot_vaadin.dto.article.*;
 import com.example.conduit_springboot_vaadin.dto.comment.AddCommentDto;
 import com.example.conduit_springboot_vaadin.dto.comment.CommentDto;
-import com.example.conduit_springboot_vaadin.dto.comment.CommentResponseDto;
 import com.example.conduit_springboot_vaadin.exception.AccessDeniedException;
 import com.example.conduit_springboot_vaadin.exception.ArticleNotFoundException;
 import com.example.conduit_springboot_vaadin.exception.CommentNotFoundException;
@@ -469,19 +468,16 @@ public class ArticleService{
     /**
      * Favorites an article identified by its slug for the current user.
      * <p>
-     * This method performs the following operations:
-     * - Logs the favorite request.
-     * - Retrieves the article by slug, throwing {@link ArticleNotFoundException} if it doesn't exist.
-     * - Checks if the current user has already favorited the article.
-     * - Adds the user to the `favoritedBy` list if not already present.
-     * - Saves the updated article to the repository.
-     * - Maps the updated article to {@link ArticleDto} and returns it.
+     * This method retrieves the article by slug, throwing {@link ArticleNotFoundException} if
+     * it doesn't exist. It checks if the current user has already favorited the article and adds
+     * the user to the `favoritedBy` list if not already present, otherwise throws {@link IllegalArgumentException}.
      * </p>
      *
      * @param slug           The unique slug identifier of the article to be favorited.
-     * @param currentUserId  The ID of the currently authenticated user performing the favoriting action.
+     * @param currentUserId  The ID of the currently authenticated user.
      * @return               An {@link ArticleDto} representing the favorited article.
      * @throws ArticleNotFoundException if no article exists with the provided slug.
+     * @throws IllegalArgumentException if the article is already favorited.
      */
     public ArticleDto favoriteArticle(String slug, String currentUserId) {
 
@@ -490,20 +486,52 @@ public class ArticleService{
         Article article = articleRepository.findBySlug(slug)
                 .orElseThrow(() -> new ArticleNotFoundException(slug));
 
-        log.debug("Article found: {}", article);
-
         if (!article.getFavoritedBy().contains(currentUserId)) {
             article.getFavoritedBy().add(currentUserId);
             log.info("User with ID: {} favorited article: {}", currentUserId, slug);
         } else {
-            throw new IllegalArgumentException("You have already favorited this article.");
+            throw new IllegalArgumentException("Article is already favorited.");
         }
 
         Article favoritedArticle = articleRepository.save(article);
-        log.info("Article with slug '{}' updated successfully with new favorite.", slug);
-        log.debug("Updated article data: {}", favoritedArticle);
+        log.info("Article with slug '{}' favorited successfully.", slug);
+        log.debug("Favorited article data: {}", favoritedArticle);
 
         return articleMapper.articleToArticleDto(favoritedArticle, currentUserId);
+    }
+
+    /**
+     * Unfavorites an article identified by its slug for the current user.
+     * <p>
+     * This method retrieves the article by slug, throwing {@link ArticleNotFoundException} if
+     * it doesn't exist. It checks if the current user has already unfavorited the article and
+     * removes the user from the `favoritedBy` list if present, otherwise throws {@link IllegalArgumentException}
+     * </p>
+     *
+     * @param slug           The unique slug identifier of the article to be unfavorited.
+     * @param currentUserId  The ID of the currently authenticated user.
+     * @return               An {@link ArticleDto} representing the unfavorited article.
+     * @throws ArticleNotFoundException if no article exists with the provided slug.
+     * @throws IllegalArgumentException if the article is already unfavorited.
+     */
+    public ArticleDto unfavoriteArticle(String slug, String currentUserId) {
+
+        log.info("Request received to unfavorite article with slug: {}", slug);
+
+        Article article = articleRepository.findBySlug(slug)
+                .orElseThrow(() -> new ArticleNotFoundException(slug));
+
+        if (article.getFavoritedBy().contains(currentUserId)) {
+            article.getFavoritedBy().remove(currentUserId);
+        } else {
+            throw new IllegalArgumentException("Article is already unfavorited.");
+        }
+
+        Article unfavoritedArticle = articleRepository.save(article);
+        log.info("Article with slug '{}' unfavorited successfully.", slug);
+        log.debug("Unfavorited article data: {}", unfavoritedArticle);
+
+        return articleMapper.articleToArticleDto(unfavoritedArticle, currentUserId);
     }
 
 }
