@@ -35,6 +35,7 @@ public class SecurityConfig {
                                 "/api/articles/*",
                                 "/api/articles/*/comments",
                                 "/api/articles",
+                                "/api/tags",
                                 "/api/profiles/**",
                                 "/api/profiles"
                         ).permitAll()
