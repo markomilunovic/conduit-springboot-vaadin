@@ -1,8 +1,8 @@
 package com.example.conduit_springboot_vaadin.controller;
 
+import com.example.conduit_springboot_vaadin.common.util.ErrorResponse;
 import com.example.conduit_springboot_vaadin.dto.profile.ProfileDto;
 import com.example.conduit_springboot_vaadin.dto.user.ResponseDto;
-import com.example.conduit_springboot_vaadin.exception.InvalidCredentialsException;
 import com.example.conduit_springboot_vaadin.security.CustomUserDetails;
 import com.example.conduit_springboot_vaadin.service.ProfileService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -38,7 +37,7 @@ public class ProfileController {
             @ApiResponse(responseCode = "200", description = "Profile retrieved successfully",
                     content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "404", description = "User not found",
-                    content = @Content(schema = @Schema(implementation = UsernameNotFoundException.class)))
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/{username}")
     public ResponseEntity<ResponseDto<ProfileDto>> getProfile(
@@ -61,11 +60,11 @@ public class ProfileController {
             @ApiResponse(responseCode = "200", description = "Successfully followed the user",
                     content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request (e.g., already following, trying to follow self)",
-                    content = @Content(schema = @Schema(implementation = IllegalArgumentException.class))),
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "Target user not found",
-                    content = @Content(schema = @Schema(implementation = UsernameNotFoundException.class))),
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = InvalidCredentialsException.class)))
+                    content = @Content(schema = @Schema(implementation = com.example.conduit_springboot_vaadin.common.util.ErrorResponse.class)))
     })
     @PostMapping("/{username}/follow")
     public ResponseEntity<ResponseDto<ProfileDto>> followUser(
@@ -83,13 +82,13 @@ public class ProfileController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successfully unfollowed the user",
-                    content = @Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ResponseDto.class))),
+                    content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request (e.g., not following, trying to unfollow self)",
-                    content = @Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = IllegalArgumentException.class))),
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "Target user not found",
-                    content = @Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = UsernameNotFoundException.class))),
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized",
-                    content = @Content(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = InvalidCredentialsException.class)))
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @DeleteMapping("/{username}/follow")
     public ResponseEntity<ResponseDto<ProfileDto>> unfollowUser(
