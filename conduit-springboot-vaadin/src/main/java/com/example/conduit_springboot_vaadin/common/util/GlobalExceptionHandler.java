@@ -1,8 +1,7 @@
 package com.example.conduit_springboot_vaadin.common.util;
 
 
-import com.example.conduit_springboot_vaadin.exception.InvalidCredentialsException;
-import com.example.conduit_springboot_vaadin.exception.UserAlreadyExistsException;
+import com.example.conduit_springboot_vaadin.exception.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -114,6 +113,73 @@ public class GlobalExceptionHandler {
                 request.getDescription(false)
         );
         return new ResponseEntity<>(errorResponse, ex.getStatusCode());
+    }
+
+    /**
+     * Handles ArticleNotFoundException when an article with the specified slug is not found.
+     * <p>
+     * * This method captures {@link ArticleNotFoundException} instances, which indicate
+     * * that an attempt was made to retrieve or modify an article that does not exist in the system.
+     * * It constructs an error response with a specific message and HTTP 404 status code.
+     * * </p
+     * @param ex      The ArticleNotFoundException.
+     * @param request The current web request during which the exception occurred.
+     * @return A ResponseEntity with the standardized error response.
+     */
+    @ExceptionHandler(ArticleNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleArticleNotFoundException(ArticleNotFoundException ex, WebRequest request) {
+        log.warn("ArticleNotFoundException: {}", ex.getMessage());
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                ex.getMessage(),
+                request.getDescription(false)
+        );
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    /**
+     * Handles AccessDeniedException when a user attempts to update an article that they do not own.
+     * <p>
+     * * This method captures {@link AccessDeniedException} instances, which indicate
+     * * that an attempt was made modify an article that the user does not have the permission to update.
+     * * It constructs an error response with a specific message and HTTP 403 status code.
+     * * </p
+     * @param ex      The AccessDeniedException.
+     * @param request The current web request during which the exception occurred.
+     * @return A ResponseEntity with the standardized error response.
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ex, WebRequest request) {
+        log.warn("AccessDeniedException: {}", ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(
+                ex.getMessage(),
+                request.getDescription(false)
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+    }
+
+    /**
+     * Handles CommentNotFoundException when a comment with the specified ID is not found.
+     * <p>
+     * * This method captures {@link CommentNotFoundException} instances, which indicate
+     * * that an attempt was made to modify or delete a comment that does not exist in the system.
+     * * It constructs an error response with a specific message and HTTP 404 status code.
+     * * </p
+     * @param ex      The CommentNotFoundException.
+     * @param request The current web request during which the exception occurred.
+     * @return A ResponseEntity with the standardized error response.
+     */
+    @ExceptionHandler(CommentNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleCommentNotFoundException(CommentNotFoundException ex, WebRequest request) {
+        log.warn("CommentNotFoundException: {}", ex.getMessage());
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                ex.getMessage(),
+                request.getDescription(false)
+        );
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
 }
