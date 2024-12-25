@@ -1,14 +1,16 @@
 package com.example.conduit_springboot_vaadin.service;
 
-import com.example.conduit_springboot_vaadin.common.util.JwtUtil;
-import com.example.conduit_springboot_vaadin.dto.user.*;
-import com.example.conduit_springboot_vaadin.exception.InvalidCredentialsException;
-import com.example.conduit_springboot_vaadin.exception.UserAlreadyExistsException;
-import com.example.conduit_springboot_vaadin.mapper.UserMapper;
-import com.example.conduit_springboot_vaadin.model.AccessToken;
-import com.example.conduit_springboot_vaadin.model.RefreshToken;
-import com.example.conduit_springboot_vaadin.model.User;
-import com.example.conduit_springboot_vaadin.repository.UserRepository;
+import com.example.conduit_springboot_vaadin.backend.common.util.JwtUtil;
+import com.example.conduit_springboot_vaadin.backend.dto.user.*;
+import com.example.conduit_springboot_vaadin.backend.exception.InvalidCredentialsException;
+import com.example.conduit_springboot_vaadin.backend.exception.UserAlreadyExistsException;
+import com.example.conduit_springboot_vaadin.backend.mapper.UserMapper;
+import com.example.conduit_springboot_vaadin.backend.model.AccessToken;
+import com.example.conduit_springboot_vaadin.backend.model.RefreshToken;
+import com.example.conduit_springboot_vaadin.backend.model.User;
+import com.example.conduit_springboot_vaadin.backend.repository.UserRepository;
+import com.example.conduit_springboot_vaadin.backend.service.TokenService;
+import com.example.conduit_springboot_vaadin.backend.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
