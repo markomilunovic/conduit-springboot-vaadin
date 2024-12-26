@@ -39,6 +39,9 @@ public class SecurityConfig {
                                 "/api/profiles/**",
                                 "/api/profiles"
                         ).permitAll()
+                        .requestMatchers(
+                                "/", "/VAADIN/**", "/frontend/**", "/hilla/**" // Add public Vaadin routes
+                        ).permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/users", "/api/users/login").permitAll()
                         .anyRequest().authenticated()
