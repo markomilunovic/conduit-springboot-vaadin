@@ -1,82 +1,219 @@
-# Conduit - Spring Boot & Vaadin Implementation
+# Conduit - Spring Boot + Vaadin
 
-This is an implementation of the RealWorld "Conduit" application, built using **Spring Boot**, **Vaadin**, and **MongoDB**. 
-The application demonstrates essential features like authentication, article management, comments, and user profiles, 
-following the RealWorld specification.
+A full-stack RealWorld (Conduit) implementation built with **Spring Boot 3.4.0**, **Vaadin 24**, and **MongoDB**.
 
-## Table of Contents
-- [Project Description](#project-description)
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Prerequisites](#prerequisites)
-- [Installation and Running Locally](#installation-and-running-locally)
-- [Application Configuration](#application-configuration)
-- [Testing](#testing)
-- [License](#license)
-- [Issues](#issues)
+This project provides a Medium.com–style blogging platform with user authentication, article management, comments, favoriting, following users, and tag-based article filtering — built according to the [RealWorld API specs](https://github.com/gothinkster/realworld).
 
-## Project Description
-Conduit is a web application inspired by the RealWorld "Conduit" project. It serves as a practical example for implementing 
-a feature-rich application using modern Java technologies. The application includes features such as user authentication, 
-article creation, and a dynamic UI, showcasing a clean integration of Spring Boot and Vaadin with MongoDB as the database.
+Currently focused on **completing backend features** and a **basic frontend**.
+
+---
 
 ## Features
-- **Authentication**: Login/Signup with JWT.
-- **User Management**: CRU (Create, Read, Update) for users.
-- **Articles**: Full CRUD operations for articles.
-- **Comments**: Create and Read comments on articles.
-- **Article Feed**: Paginated global feed, user-specific feed, and filtered feeds by tags.
-- **Social Features**: Favorite articles and follow/unfollow users.
 
-## Tech Stack
-- **Backend**: Spring Boot (with Spring Security and Spring Data MongoDB).
-- **Frontend**: Vaadin (for a modern web UI).
-- **Database**: MongoDB.
+**Backend (Spring Boot + MongoDB)**
 
-## Prerequisites
-Ensure the following are installed:
-- **Java 21** or higher
-- **Maven**
-- **MongoDB**
+- JWT Authentication (login, registration, token validation)
+- CRUD Articles (create, read, update, delete)
+- CRD Comments on articles
+- Favorite and unfavorite articles
+- Follow and unfollow users
+- Pagination support for articles and feed
+- Tag listing
+- Centralized error handling
+- Clean DTO → Entity mapping (via Mapper classes)
+- OpenAPI (Swagger) documentation
 
-## Installation and Running Locally
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/markomilunovic/conduit-springboot-vaadin.git
-   cd conduit-springboot-vaadin
-   ```
+**Frontend (Vaadin 24)**
 
-2. **Configure MongoDB**: Ensure MongoDB is running locally and create a database named `conduitdb`.
+- Load and display articles
+- Load and display tags
+- Basic interaction between article/tag listings
+- Notification system for errors
 
-3. **Build the application**:
-   ```bash
-   mvn clean install
-   ```
+---
 
-4. **Run the application**:
-   ```bash
-   mvn spring-boot:run
-   ```
+## Project Structure
 
-5. **Access the application**: Visit [http://localhost:8080](http://localhost:8080).
-
-## Application Configuration
-Configurations are defined in `application.properties`:
-
-- **MongoDB URI**: `spring.data.mongodb.uri=mongodb://localhost:27017/conduitdb`
-- **JWT Secrets**: Configured for access and refresh tokens.
-- **Token Expirations**:
-    - Access Token: 15 minutes
-    - Refresh Token: 7 days
-
-## Testing
-Run unit tests with:
 ```bash
-mvn test
+conduit-springboot-vaadin
+├── src/main/java/com/example/conduit_springboot_vaadin/
+│   ├── backend/
+│   │   ├── common/        # Utility classes, global error handling
+│   │   ├── config/        # Security configuration
+│   │   ├── controller/    # REST API endpoints (Articles, Users, Tags, Profiles)
+│   │   ├── dto/           # Data Transfer Objects
+│   │   ├── exception/     # Custom exceptions
+│   │   ├── mapper/        # Entity <-> DTO mappers
+│   │   ├── model/         # MongoDB domain models
+│   │   ├── repository/    # Spring Data MongoDB repositories
+│   │   ├── security/      # CustomUserDetails and Authentication logic
+│   │   └── service/       # Business logic (ArticleService, UserService, etc.)
+│   ├── frontend/
+│   │   ├── config/        # Frontend configuration (RestTemplate)
+│   │   ├── service/       # Frontend service calls (Articles, Tags)
+│   │   └── view/          # Vaadin UI (MainView)
+├── src/main/resources/
+│   ├── application.properties # App configuration (MongoDB URI, JWT secrets, logging)
+├── pom.xml                     # Maven project configuration
+└── README.md                    # (You're here!)
 ```
 
-## License
-This project is licensed under the MIT License. See the `LICENSE` file for details.
+---
 
-## Issues
-The "Issues" section is open. Report bugs or share feedback.
+## Technologies Used
+- **Java 21**
+- **Spring Boot 3.4.0**
+- **Vaadin 24**
+- **MongoDB**
+- **Spring Security (JWT authentication)**
+- **Spring Data MongoDB**
+- **Lombok**
+- **Javadoc** (method documentation)
+- **Swagger / OpenAPI** (API documentation)
+- **Jakarta Validation**
+
+---
+
+## Database
+Using MongoDB (non-relational)
+
+Default connection string in `application.properties`:
+```properties
+spring.data.mongodb.uri=mongodb://localhost:27017/conduitdb
+```
+
+Collections:
+- users
+- articles
+- comments
+- access_token
+- refresh_token
+
+---
+
+## How to Run the Project
+
+1.  **Clone the Repository**
+
+    ```bash
+    git clone https://github.com/yourusername/conduit-springboot-vaadin.git
+    cd conduit-springboot-vaadin
+    ```
+
+2. **Set Up MongoDB**
+
+   Make sure MongoDB is running locally at `localhost:27017`.
+
+   If not installed, install MongoDB first: [MongoDB Download](https://www.mongodb.com/try/download/community)
+
+3. **Run the Application**
+
+    ```bash
+    ./mvnw spring-boot:run
+    ```
+   The server will start on [http://localhost:8080/](http://localhost:8080/).
+
+4. **Access Swagger UI**
+
+   View API documentation at:
+    ```bash
+    http://localhost:8080/swagger-ui/index.html
+    ```
+
+5. **Access the Frontend (Vaadin)**
+
+   Visit:
+    ```bash
+    http://localhost:8080/
+    ```
+   MainView will load with options to display articles and tags.
+
+---
+
+## Frontend Status
+This project implements a full-stack architecture with a Spring Boot backend and a Vaadin-based frontend.
+
+- The backend implements approximately 85% of the RealWorld API specification.
+- The frontend currently supports basic article and tag browsing.
+- Features like login, article editor, profile pages, favoriting, following, and commenting will be added in future iterations.
+
+---
+
+## Authentication
+Login via `/api/users/login` to receive an **Access Token** and **Refresh Token**.
+
+Use the Access Token in the `Authorization` header for protected API calls:
+```http
+Authorization: Token jwt.token.here
+```
+
+---
+
+## API Endpoints Overview
+
+| Feature             | Endpoint                                  | Access        |
+|---------------------|-------------------------------------------|---------------|
+| User Registration   | POST /api/users                           | Public        |
+| User Login          | POST /api/users/login                     | Public        |
+| Get Current User    | GET /api/user                             | Authenticated |
+| Update User         | PUT /api/user                             | Authenticated |
+| Get Profile         | GET /api/profiles/{username}              | Public        |
+| Follow User         | POST /api/profiles/{username}/follow      | Authenticated |
+| Unfollow User       | DELETE /api/profiles/{username}/follow    | Authenticated |
+| List Articles       | GET /api/articles                         | Public        |
+| List Feed           | GET /api/articles/feed                    | Authenticated |
+| Get Article         | GET /api/articles/{slug}                  | Public        |
+| Create Article      | POST /api/articles                        | Authenticated |
+| Update Article      | PUT /api/articles/{slug}                  | Authenticated |
+| Delete Article      | DELETE /api/articles/{slug}               | Authenticated |
+| Add Comment         | POST /api/articles/{slug}/comments        | Authenticated |
+| Get Comments        | GET /api/articles/{slug}/comments         | Public        |
+| Delete Comment      | DELETE /api/articles/{slug}/comments/{id} | Authenticated |
+| Favorite Article    | POST /api/articles/{slug}/favorite        | Authenticated |
+| Unfavorite Article  | DELETE /api/articles/{slug}/favorite      | Authenticated |
+| Get Tags            | GET /api/tags                             | Public        |
+
+Full API docs available at Swagger UI.
+
+---
+
+## Error Handling
+All errors are returned in a standardized format:
+```json
+{
+  "status": "error",
+  "message": "Resource not found",
+  "timestamp": "2025-04-28T14:23:12.345Z"
+}
+```
+
+Custom Exceptions include:
+- `UserAlreadyExistsException`
+- `InvalidCredentialsException`
+- `ArticleNotFoundException`
+- `CommentNotFoundException`
+- `AccessDeniedException`
+
+---
+
+## Future Improvements
+- Expand Vaadin frontend: login, register, settings, profile, editor pages
+- Add markdown support for article body (frontend rendering)
+- Implement token refresh endpoint
+- Add tests (unit/integration)
+- Add pagination controls on frontend
+- Dockerize the application
+- Deploy to cloud (AWS, Heroku, Render, etc.)
+
+---
+
+## Author
+**Marko Milunović**  
+[LinkedIn Profile](https://www.linkedin.com/in/marko-milunović-946428267)
+
+---
+
+## License
+This project is licensed under the MIT License.
+
+Feel free to use it for learning, building projects, or as a base for further improvements.
